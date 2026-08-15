@@ -46,7 +46,7 @@ pub fn render(framebuffer: &mut Framebuffer, objects: &[Sphere]) {
             let screen_x = screen_x * aspect_ratio * perspective_scale;
             let screen_y = screen_y * perspective_scale;
             
-            let ray_direction = Vector3::new(screen_x, screen_y, -1.0).normalized();
+            let ray_direction = Vector3::new(screen_x, screen_y, -1.0).normalize();
             let ray_origin = Vector3::new(0.0, 0.0, 0.0);
 
             //

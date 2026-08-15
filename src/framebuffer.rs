@@ -5,15 +5,16 @@ use std::io::{BufWriter, Write};
 use std::path::Path;
 
 pub struct Framebuffer {
-    width: u32,
-    height: u32,
+    pub width: u32,
+    pub height: u32,
     color_buffer: Image,
     background_color: Color,
     pub current_color: Color,
 }
 
 impl Framebuffer {
-    pub fn new(width: u32, height: u32, background_color: Color) -> Self {
+    pub fn new(width: u32, height: u32) -> Self {
+        let background_color = Color::BLACK;
         let color_buffer = Image::gen_image_color(width as i32, height as i32, background_color);
 
         Self {
@@ -25,6 +26,10 @@ impl Framebuffer {
         }
     }
 
+    pub fn set_background_color(&mut self, background_color: Color) {
+        self.background_color = background_color;
+    }
+
     pub fn clear(&mut self) {
         self.color_buffer = Image::gen_image_color(
             self.width as i32,
@@ -33,9 +38,10 @@ impl Framebuffer {
         );
     }
 
-    pub fn set_pixel(&mut self, x: i32, y: i32, color: Color) {
-        if x >= 0 && y >= 0 && x < self.width as i32 && y < self.height as i32 {
-            self.color_buffer.draw_pixel(x, y, color);
+    pub fn set_pixel(&mut self, x: u32, y: u32) {
+        if x < self.width && y < self.height {
+            self.color_buffer
+                .draw_pixel(x as i32, y as i32, self.current_color);
         }
     }
 
@@ -52,6 +58,14 @@ impl Framebuffer {
             self.render_to_bmp_file(filename);
         } else {
             self.color_buffer.export_image(filename);
+        }
+    }
+
+    pub fn swap_buffers(&self, window: &mut RaylibHandle, thread: &RaylibThread) {
+        if let Ok(texture) = window.load_texture_from_image(thread, &self.color_buffer) {
+            let mut d = window.begin_drawing(thread);
+            d.clear_background(self.background_color);
+            d.draw_texture(&texture, 0, 0, Color::WHITE);
         }
     }
 
