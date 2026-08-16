@@ -32,10 +32,26 @@ impl RayIntersect for Sphere {
         let t1 = (-b - sqrt_discriminant) / denom;
         let t2 = (-b + sqrt_discriminant) / denom;
 
-        if t1 < 0.0 && t2 < 0.0 {
+        let t = if t1 > 0.0 && t2 > 0.0 {
+            t1.min(t2)
+        } else if t1 > 0.0 {
+            t1
+        } else if t2 > 0.0 {
+            t2
+        } else {
+            return Material::default();
+        };
+
+        let hit_point = Vector3::new(
+            ray_origin.x + ray_direction.x * t,
+            ray_origin.y + ray_direction.y * t,
+            ray_origin.z + ray_direction.z * t,
+        );
+
+        if hit_point.z.is_nan() {
             return Material::default();
         }
 
-        self.material
+        self.material.resolved_at(&self.center, &hit_point)
     }
 }

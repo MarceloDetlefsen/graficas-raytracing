@@ -23,7 +23,7 @@ pub fn cast_ray(
     for object in objects {
         let material = object.ray_intersect(ray_origin, ray_direction);
 
-        if material.diffuse != Color::BLACK {
+        if material.hit {
             return material.diffuse;
         }
     }
@@ -41,12 +41,12 @@ pub fn render(framebuffer: &mut Framebuffer, objects: &[Sphere]) {
     for y in 0..framebuffer.height {
         for x in 0..framebuffer.width {
             let screen_x = (2.0 * x as f32) / width - 1.0;   // 0 .. 1
-            let screen_y = (2.0 * y as f32) / height - 1.0;
+            let screen_y = 1.0 - (2.0 * y as f32) / height;
 
             let screen_x = screen_x * aspect_ratio * perspective_scale;
             let screen_y = screen_y * perspective_scale;
             
-            let ray_direction = Vector3::new(screen_x, screen_y, -1.0).normalize();
+            let ray_direction = Vector3::new(screen_x, screen_y, 1.0).normalize();
             let ray_origin = Vector3::new(0.0, 0.0, 0.0);
 
             //
@@ -56,6 +56,120 @@ pub fn render(framebuffer: &mut Framebuffer, objects: &[Sphere]) {
         }
     }
         
+}
+
+fn build_monokuma_scene() -> Vec<Sphere> {
+    const BLANCO: Color = Color::new(245, 245, 245, 255);
+    const NEGRO: Color = Color::new(25, 25, 25, 255);
+    const ROJO: Color = Color::new(200, 30, 30, 255);
+
+    vec![
+        Sphere {
+            center: Vector3::new(-0.32, 1.28, 4.7),
+            radius: 0.08,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(-0.16, 1.20, 4.7),
+            radius: 0.08,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.0, 1.16, 4.7),
+            radius: 0.08,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(0.16, 1.20, 4.7),
+            radius: 0.08,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.32, 1.28, 4.7),
+            radius: 0.08,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(0.40, 1.94, 4.7),
+            radius: 0.06,
+            material: Material::solid(ROJO),
+        },
+        Sphere {
+            center: Vector3::new(0.52, 1.80, 4.7),
+            radius: 0.06,
+            material: Material::solid(ROJO),
+        },
+        Sphere {
+            center: Vector3::new(-0.32, 1.78, 4.85),
+            radius: 0.12,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.32, 1.78, 4.85),
+            radius: 0.12,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(0.0, 1.56, 4.85),
+            radius: 0.10,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.05, 0.04, 4.8),
+            radius: 0.45,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(0.16, 0.18, 4.65),
+            radius: 0.06,
+            material: Material::solid(ROJO),
+        },
+        Sphere {
+            center: Vector3::new(-0.06, -0.10, 4.65),
+            radius: 0.06,
+            material: Material::solid(ROJO),
+        },
+        Sphere {
+            center: Vector3::new(0.85, 0.15, 5.0),
+            radius: 0.32,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(-0.85, 0.15, 5.0),
+            radius: 0.32,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.35, -0.85, 5.0),
+            radius: 0.38,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: Vector3::new(-0.35, -0.85, 5.0),
+            radius: 0.38,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(-0.63, 2.48, 5.0),
+            radius: 0.35,
+            material: Material::split_color(BLANCO, NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.63, 2.50, 5.0),
+            radius: 0.35,
+            material: Material::split_color(BLANCO, NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.0, 1.70, 5.0),
+            radius: 1.0,
+            material: Material::split_color(BLANCO, NEGRO),
+        },
+        Sphere {
+            center: Vector3::new(0.0, 0.0, 5.0),
+            radius: 0.9,
+            material: Material::split_color(BLANCO, NEGRO),
+        },
+    ]
 }
 
 fn main() {
@@ -71,27 +185,7 @@ fn main() {
     let mut framebuffer = Framebuffer::new(window_width as u32, window_height as u32);
 
     framebuffer.set_background_color(Color::new(80, 80, 200, 255));
-
-    let rubber = Material {
-        diffuse: Color::new(80, 0, 0, 255),
-    };
-
-    let ivory = Material {
-        diffuse: Color::new(100, 100, 80, 255),
-    };
-
-    let objects = [
-        Sphere {
-            center: Vector3::new(0.0, 0.0, -5.0),
-            radius: 1.0,
-            material: ivory,
-        },
-        Sphere {
-            center: Vector3::new(0.0, 3.0, -10.0),
-            radius: 0.5,
-            material: rubber,
-        }
-    ];
+    let objects = build_monokuma_scene();
 
     while !window.window_should_close() {
         framebuffer.clear();
