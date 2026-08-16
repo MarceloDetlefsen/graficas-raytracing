@@ -93,33 +93,40 @@ fn build_monokuma_scene() -> Vec<Sphere> {
     const GRIS_BOTON: Color = Color::new(60, 55, 50, 255);
 
     let head_center = Vector3::new(0.00, 1.28, 5.0);
-    let head_radius = 1.15;
+    let head_radius = 1.00;
     // x alineado con la cabeza (antes 0.07) para que la línea de partición
     // blanco/negro del torso quede exactamente debajo de la de la cabeza,
     // sin el pequeño "quiebre" que se veía en el cuello.
     let body_center = Vector3::new(0.00, -0.12, 5.0);
-    let body_radius = 1.00;
+    let body_radius = 1.15;
+
+    // La cabeza se achicó (1.15 -> 1.00) y el torso creció (1.00 -> 1.15).
+    // Todo lo que "cuelga" de cada uno (orejas/ojos/nariz de la cabeza;
+    // panza/brazos/piernas del torso) se reescala en la misma proporción
+    // para que guarden el mismo aspecto relativo que antes del cambio.
+    let k_head = head_radius / 1.15; // = 0.8696
+    let k_body = body_radius / 1.00; // = 1.15
 
     vec![
         // --- Orejas: base de un solo color + muesca del color opuesto ---
         Sphere {
-            center: Vector3::new(-0.82, 2.22, 5.0),
-            radius: 0.32,
+            center: Vector3::new(-0.82 * k_head, head_center.y + 0.94 * k_head, 5.0),
+            radius: 0.32 * k_head,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: Vector3::new(-0.68, 2.06, 4.85),
-            radius: 0.17,
+            center: Vector3::new(-0.68 * k_head, head_center.y + 0.78 * k_head, 5.0 - 0.15 * k_head),
+            radius: 0.17 * k_head,
             material: Material::solid(NEGRO),
         },
         Sphere {
-            center: Vector3::new(0.82, 2.22, 5.0),
-            radius: 0.32,
+            center: Vector3::new(0.82 * k_head, head_center.y + 0.94 * k_head, 5.0),
+            radius: 0.32 * k_head,
             material: Material::solid(NEGRO),
         },
         Sphere {
-            center: Vector3::new(0.68, 2.06, 4.85),
-            radius: 0.17,
+            center: Vector3::new(0.68 * k_head, head_center.y + 0.78 * k_head, 5.0 - 0.15 * k_head),
+            radius: 0.17 * k_head,
             material: Material::solid(BLANCO),
         },
 
@@ -137,68 +144,68 @@ fn build_monokuma_scene() -> Vec<Sphere> {
 
         // --- Ojos: izquierdo negro (sobre lado blanco), derecho rojo (sobre lado negro) ---
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, -0.30, 0.14, 0.18),
-            radius: 0.16,
+            center: detail_on_sphere(head_center, head_radius, -0.30 * k_head, 0.14 * k_head, 0.18 * k_head),
+            radius: 0.16 * k_head,
             material: Material::solid(NEGRO),
         },
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.30, 0.14, 0.18),
-            radius: 0.16,
+            center: detail_on_sphere(head_center, head_radius, 0.30 * k_head, 0.14 * k_head, 0.18 * k_head),
+            radius: 0.16 * k_head,
             material: Material::solid(ROJO),
         },
 
         // --- Nariz: círculo blanco más grande y más abajo de los ojos,
         //     con el circulito negro también bajado un poco ---
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.02, -0.20, 0.26),
-            radius: 0.15,
+            center: detail_on_sphere(head_center, head_radius, 0.02 * k_head, -0.20 * k_head, 0.26 * k_head),
+            radius: 0.19 * k_head,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.02, -0.24, 0.42),
-            radius: 0.06,
+            center: detail_on_sphere(head_center, head_radius, 0.02 * k_head, -0.18 * k_head, 0.44 * k_head),
+            radius: 0.06 * k_head,
             material: Material::solid(NEGRO),
         },
 
         // --- Panza: borde negro (ligeramente más grande, más al fondo)
         //     detrás del círculo blanco, para que solo se asome como reborde ---
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.12),
-            radius: 0.44,
+            center: detail_on_sphere(body_center, body_radius, -0.05 * k_body, 0.05 * k_body, 0.12 * k_body),
+            radius: 0.44 * k_body,
             material: Material::solid(NEGRO),
         },
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.32),
-            radius: 0.40,
+            center: detail_on_sphere(body_center, body_radius, -0.05 * k_body, 0.05 * k_body, 0.32 * k_body),
+            radius: 0.40 * k_body,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.38),
-            radius: 0.07,
+            center: detail_on_sphere(body_center, body_radius, -0.05 * k_body, 0.05 * k_body, 0.38 * k_body),
+            radius: 0.07 * k_body,
             material: Material::solid(GRIS_BOTON),
         },
 
         // --- Brazos: izquierdo blanco, derecho negro (igual que el cuerpo) ---
         Sphere {
-            center: Vector3::new(-0.98, 0.05, 5.0),
-            radius: 0.38,
+            center: Vector3::new(-0.98 * k_body, body_center.y + 0.17 * k_body, 5.0),
+            radius: 0.38 * k_body,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: Vector3::new(0.98, 0.05, 5.0),
-            radius: 0.38,
+            center: Vector3::new(0.98 * k_body, body_center.y + 0.17 * k_body, 5.0),
+            radius: 0.38 * k_body,
             material: Material::solid(NEGRO),
         },
 
         // --- Piernas: izquierda blanca, derecha negra (igual que el cuerpo) ---
         Sphere {
-            center: Vector3::new(-0.32, -0.88, 5.0),
-            radius: 0.42,
+            center: Vector3::new(-0.32 * k_body, body_center.y - 0.76 * k_body, 5.0),
+            radius: 0.42 * k_body,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: Vector3::new(0.32, -0.88, 5.0),
-            radius: 0.42,
+            center: Vector3::new(0.32 * k_body, body_center.y - 0.76 * k_body, 5.0),
+            radius: 0.42 * k_body,
             material: Material::solid(NEGRO),
         },
     ]
