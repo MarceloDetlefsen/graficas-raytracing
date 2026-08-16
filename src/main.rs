@@ -65,9 +65,9 @@ pub fn render(framebuffer: &mut Framebuffer, objects: &[Sphere]) {
     }
 }
 
-/// Coloca un detalle "pegado" a la superficie visible (más cercana a cámara)
-/// de una esfera padre, en coordenadas locales (u = derecha, v = arriba)
-/// relativas al centro del padre, empujado `protrusion` unidades hacia cámara.
+/// Coloca un detalle "pegado" a la superficie visible de una esfera padre,
+/// en coordenadas locales (u = derecha, v = arriba) relativas a su centro,
+/// empujado `protrusion` unidades hacia cámara para evitar z-fighting.
 fn detail_on_sphere(
     parent_center: Vector3,
     parent_radius: f32,
@@ -79,7 +79,7 @@ fn detail_on_sphere(
     let y = parent_center.y + local_v;
 
     let dist_sq = local_u * local_u + local_v * local_v;
-    let clamped = dist_sq.min(parent_radius * parent_radius * 0.98);
+    let clamped = dist_sq.min(parent_radius * parent_radius * 0.90);
     let dz_surface = (parent_radius * parent_radius - clamped).sqrt();
     let surface_z = parent_center.z - dz_surface;
 
@@ -91,20 +91,23 @@ fn build_monokuma_scene() -> Vec<Sphere> {
     const NEGRO: Color = Color::new(25, 25, 25, 255);
     const ROJO: Color = Color::new(200, 30, 30, 255);
 
-    let head_center = Vector3::new(0.00, 1.70, 5.0);
+    // Toda la figura bajada ~0.42 respecto a la versión anterior para que
+    // quepa dentro del frustum visible (a z=5.0, con FOV PI/3, el rango
+    // vertical visible es de aprox. ±2.89 unidades).
+    let head_center = Vector3::new(0.00, 1.28, 5.0);
     let head_radius = 1.15;
-    let body_center = Vector3::new(0.07, 0.30, 5.0);
+    let body_center = Vector3::new(0.07, -0.12, 5.0);
     let body_radius = 1.00;
 
     vec![
-        // --- Orejas (independientes, no pegadas a la cabeza vía helper) ---
+        // --- Orejas (ahora dentro del frustum: top ≈ 2.52) ---
         Sphere {
-            center: Vector3::new(-0.82, 2.64, 5.0),
+            center: Vector3::new(-0.82, 2.22, 5.0),
             radius: 0.30,
             material: Material::split_color(BLANCO, NEGRO),
         },
         Sphere {
-            center: Vector3::new(0.82, 2.64, 5.0),
+            center: Vector3::new(0.82, 2.22, 5.0),
             radius: 0.30,
             material: Material::split_color(BLANCO, NEGRO),
         },
@@ -121,103 +124,103 @@ fn build_monokuma_scene() -> Vec<Sphere> {
             material: Material::split_color(BLANCO, NEGRO),
         },
 
-        // --- Ojos (capa 1: protrusion 0.18) ---
+        // --- Ojos ---
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, -0.32, 0.10, 0.18),
-            radius: 0.17,
-            material: Material::solid(NEGRO), // ojo negro sobre lado blanco
-        },
-        Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.32, 0.10, 0.18),
-            radius: 0.17,
-            material: Material::solid(BLANCO), // ojo blanco sobre lado negro
-        },
-
-        // --- Nariz (capa 2: protrusion 0.20, debajo de los ojos) ---
-        Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.0, -0.15, 0.20),
-            radius: 0.10,
-            material: Material::solid(NEGRO),
-        },
-
-        // --- Boca (capa 3: protrusion 0.22, debajo de la nariz, arco de sonrisa) ---
-        Sphere {
-            center: detail_on_sphere(head_center, head_radius, -0.36, -0.36, 0.22),
-            radius: 0.09,
-            material: Material::solid(BLANCO),
-        },
-        Sphere {
-            center: detail_on_sphere(head_center, head_radius, -0.18, -0.40, 0.22),
-            radius: 0.09,
+            center: detail_on_sphere(head_center, head_radius, -0.30, 0.12, 0.18),
+            radius: 0.16,
             material: Material::solid(NEGRO),
         },
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.0, -0.42, 0.22),
-            radius: 0.09,
-            material: Material::solid(BLANCO),
-        },
-        Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.18, -0.40, 0.22),
-            radius: 0.09,
-            material: Material::solid(NEGRO),
-        },
-        Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.36, -0.36, 0.22),
-            radius: 0.09,
+            center: detail_on_sphere(head_center, head_radius, 0.30, 0.12, 0.18),
+            radius: 0.16,
             material: Material::solid(BLANCO),
         },
 
-        // --- Rayo rojo sobre el ojo derecho (capa 4: protrusion 0.24, lejos del ojo) ---
+        // --- Nariz ---
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.48, 0.34, 0.24),
+            center: detail_on_sphere(head_center, head_radius, 0.02, -0.12, 0.24),
+            radius: 0.09,
+            material: Material::solid(NEGRO),
+        },
+
+        // --- Boca (protrusion reforzada para que no la tape la curvatura) ---
+        Sphere {
+            center: detail_on_sphere(head_center, head_radius, -0.26, -0.33, 0.36),
+            radius: 0.08,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: detail_on_sphere(head_center, head_radius, -0.13, -0.37, 0.36),
+            radius: 0.08,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: detail_on_sphere(head_center, head_radius, 0.02, -0.39, 0.36),
+            radius: 0.08,
+            material: Material::solid(BLANCO),
+        },
+        Sphere {
+            center: detail_on_sphere(head_center, head_radius, 0.15, -0.37, 0.36),
+            radius: 0.08,
+            material: Material::solid(NEGRO),
+        },
+        Sphere {
+            center: detail_on_sphere(head_center, head_radius, 0.28, -0.33, 0.36),
+            radius: 0.08,
+            material: Material::solid(BLANCO),
+        },
+
+        // --- Rayo rojo sobre el ojo derecho ---
+        Sphere {
+            center: detail_on_sphere(head_center, head_radius, 0.42, 0.36, 0.30),
             radius: 0.045,
             material: Material::solid(ROJO),
         },
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.58, 0.42, 0.24),
+            center: detail_on_sphere(head_center, head_radius, 0.50, 0.44, 0.30),
             radius: 0.045,
             material: Material::solid(ROJO),
         },
 
-        // --- Panza sobre el cuerpo (capa 1: protrusion 0.16) ---
+        // --- Panza sobre el cuerpo ---
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.16),
-            radius: 0.48,
+            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.20),
+            radius: 0.38,
             material: Material::solid(BLANCO),
         },
 
-        // --- Marca "X" roja sobre la panza (capa 2: protrusion 0.20) ---
+        // --- Marca "X" roja sobre la panza ---
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.15, 0.15, 0.20),
-            radius: 0.06,
+            center: detail_on_sphere(body_center, body_radius, -0.13, 0.13, 0.26),
+            radius: 0.05,
             material: Material::solid(ROJO),
         },
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, 0.12, -0.10, 0.20),
-            radius: 0.06,
+            center: detail_on_sphere(body_center, body_radius, 0.10, -0.08, 0.26),
+            radius: 0.05,
             material: Material::solid(ROJO),
         },
 
         // --- Brazos ---
         Sphere {
-            center: Vector3::new(1.05, 0.42, 5.0),
+            center: Vector3::new(0.95, 0.00, 5.0),
             radius: 0.35,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: Vector3::new(-1.05, 0.42, 5.0),
+            center: Vector3::new(-0.95, 0.00, 5.0),
             radius: 0.35,
             material: Material::solid(NEGRO),
         },
 
         // --- Piernas ---
         Sphere {
-            center: Vector3::new(0.38, -0.55, 5.0),
+            center: Vector3::new(0.32, -0.90, 5.0),
             radius: 0.40,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: Vector3::new(-0.38, -0.55, 5.0),
+            center: Vector3::new(-0.32, -0.90, 5.0),
             radius: 0.40,
             material: Material::solid(NEGRO),
         },
