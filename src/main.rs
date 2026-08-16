@@ -155,25 +155,25 @@ fn build_monokuma_scene() -> Vec<Sphere> {
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: detail_on_sphere(head_center, head_radius, 0.02, -0.08, 0.32),
-            radius: 0.05,
+            center: detail_on_sphere(head_center, head_radius, 0.02, -0.24, 0.42),
+            radius: 0.06,
             material: Material::solid(NEGRO),
         },
 
         // --- Panza: borde negro (ligeramente más grande, más al fondo)
         //     detrás del círculo blanco, para que solo se asome como reborde ---
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.18),
-            radius: 0.45,
+            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.12),
+            radius: 0.44,
             material: Material::solid(NEGRO),
         },
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.22),
-            radius: 0.42,
+            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.32),
+            radius: 0.40,
             material: Material::solid(BLANCO),
         },
         Sphere {
-            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.34),
+            center: detail_on_sphere(body_center, body_radius, -0.05, 0.05, 0.38),
             radius: 0.07,
             material: Material::solid(GRIS_BOTON),
         },
