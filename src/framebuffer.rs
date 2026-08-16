@@ -8,7 +8,7 @@ pub struct Framebuffer {
     pub width: u32,
     pub height: u32,
     color_buffer: Image,
-    background_color: Color,
+    pub background_color: Color,
     pub current_color: Color,
 }
 

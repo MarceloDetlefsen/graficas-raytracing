@@ -52,6 +52,6 @@ impl RayIntersect for Sphere {
             return Material::default();
         }
 
-        self.material.resolved_at(&self.center, &hit_point)
+        self.material.resolved_at(&self.center, &hit_point, t)
     }
 }
